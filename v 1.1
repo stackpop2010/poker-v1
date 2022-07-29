@@ -1,0 +1,255 @@
+'''
+Poker App Version 1.1
+
+To Do:
+-Score hands are not working correctly
+-need to add in condition for 2 pairs
+-Add score/betting results
+
+Advanced:
+-allow computer to replace hand, probably won't be able to do this for awhile
+'''
+
+
+import random
+deck = list()
+myhand=list()
+comphand=list()
+mscore=0
+cscore=0
+wallet=50
+
+def builddeck(suit):
+    #instructions to build deck so you don't have to type in all 52 cards
+    #will additionally use to "shuffle" the deck after each round
+    card =2
+    while card <11:
+        card = str(card)
+        newcard =(card + suit)
+        deck.append(newcard)
+        card = int(card)
+        card=card +1
+    deck.append('J' + suit)
+    deck.append('Q' + suit)
+    deck.append('K' + suit)
+    deck.append('A' + suit)
+
+
+
+def drawhand():
+
+    if wallet <0:
+        print("You are out of money, it's time to go home")
+        exit()
+    while wallet >1000:
+        print("You've made over $1000, know how to quit while you're ahead!")
+        exit()
+    #run deckbuilder in here to "reshuffle" every round
+    builddeck(' ♦')
+    builddeck(' ♠')
+    builddeck(' ♥')
+    builddeck(' ♣')
+    #instructions to draw hands for player and computer
+    bet=input('How much would you like to bet? Answer in whole dollars, you currently have %d dollars, must bet at least 1 dollar ' % wallet)
+    try:
+        int(bet)
+    #don't remember how to get except statement to repeat (turn into a function and use recursion?)
+    except:
+        print("Invalid input, try again, whole numbers only")
+        bet=input('How much would you like to bet? Answer in whole dollars, you currently have %d dollars, must bet at least 1 dollar ' % wallet)
+
+    myhand.clear()
+    comphand.clear()
+    for i in range(5):
+        mc1=random.choice(deck)
+        deck.remove(mc1)
+        myhand.append(mc1)
+        cc1=random.choice(deck)
+        deck.remove(cc1)
+        comphand.append(cc1)
+
+    print("Your cards are:",myhand)
+    trade=input("\nWould you like to trade any cards? y/n: ")
+    if trade == "y" or redraw =="Y":
+        redraw()
+    else:
+        print("Computer's hand is:",comphand)
+
+
+
+def redraw():
+    i=0
+    while i<5:
+        print("Would you like to exchange card:",myhand[i])
+        exchange=input(" y/n: ")
+        if exchange == 'y' or exchange == "y":
+            myhand.pop(i)
+            new=random.choice(deck)
+            #note, if you append instead of insert, it adds to end of list and messes up the count
+            myhand.insert(i, new)
+            deck.remove(new)
+        i=i+1
+    print("new hand is:",myhand)
+    print("Computer's hand is:",comphand)
+
+def scorehand(temphand, score, who):
+    #defining some combos within the score function so variables can be resused within function
+    def straightflush():
+        a=2
+        b=3
+        c=4
+        d=5
+        e=6
+        while e <15:
+            a=str(a)
+            b=str(b)
+            c=str(c)
+            d=str(d)
+            e=str(e)
+            if any(a and b and c and d and e in card for card in hand):
+                return True
+
+            else:
+                a=int(a)
+                a=a+1
+                b=int(b)
+                b=b+1
+                c=int(c)
+                c=c+1
+                d=int(d)
+                d=d+1
+                e=int(e)
+                e=e+1
+
+    def fourofakind():
+        a=2
+        while a < 15:
+            a=str(a)
+            club=(a+" ♣")
+            diamond=(a+" ♦")
+            heart=(a+" ♥")
+            spade=(a+" ♠")
+            if club in hand\
+            and diamond in hand\
+            and heart in hand\
+            and spade in hand:
+                return True
+            else:
+                a=int(a)
+                a=a+1
+
+    def threeofakind():
+        a=2
+        while a < 15:
+            a=str(a)
+            club=(a+" ♣")
+            diamond=(a+" ♦")
+            heart=(a+" ♥")
+            spade=(a+" ♠")
+            if (club in hand and diamond in hand and heart in hand)\
+            or (club in hand and diamond in hand and spade in hand)\
+            or (club in hand and heart in hand and spade in hand)\
+            or (diamond in hand and heart in hand and spade in hand):
+                return True
+            else:
+                a=int(a)
+                a=a+1
+
+    def pair():
+        a=2
+        while a < 15:
+            a=str(a)
+            club=(a+" ♣")
+            diamond=(a+" ♦")
+            heart=(a+" ♥")
+            spade=(a+" ♠")
+            if (club in hand and diamond in hand)\
+            or (club in hand and spade in hand)\
+            or (club in hand and heart in hand)\
+            or (diamond in hand and heart in hand)\
+            or (diamond in hand and spade in hand)\
+            or (heart in hand and spade in hand):
+                return True
+            else:
+                a=int(a)
+                a=a+1
+
+    #need to score Royal flush, straight flush, four of a kind, full house, flush, straight , 3 of a kind, 2 pairs, 1 pair, high card
+    #For some of these we will need to order the list and switch face cards to number values
+    #note \ breaks up long lines DO NOT just press enter
+    #order cards
+    #convert hand to be ordered numerically by function but not put out nonsense to user
+
+    hand=list(temphand)
+    #convert face cards to numerical value for sorting and scoring
+    if any('J' in card for card in hand):
+        hand=[card.replace('J', '11') for card in hand]
+    if any('Q' in card for card in hand):
+        hand=[card.replace('Q', '12') for card in hand]
+    if any('K' in card for card in hand):
+        hand=[card.replace('K', '13') for card in hand]
+    if any('A' in card for card in hand):
+        hand=[card.replace('A', '14') for card in hand]
+    #sort hand so straights can be found
+    hand.sort()
+    #Royal Flush
+    if ('10' in hand\
+    and '11' in hand\
+    and '12' in hand\
+    and '13' in hand\
+    and '14' in hand)\
+    and (all('♣' in card for card in hand)\
+    or all('♠' in card for card in hand) or all('♥' in card for card in hand)\
+    or all('♦' in card for card in hand)):
+        score= 10
+        print(who,'has Royal Flush')
+
+    #Straight Flush (consecutive numbers from same suit)
+    elif (all('♣' in card for card in hand)\
+    or all('♠' in card for card in hand) or all('♥' in card for card in hand)\
+    or all('♦' in card for card in hand))\
+    and (straightflush() == True):
+        score =9
+        print(who,'has Straight Flush')
+
+    #Four of a kind
+    elif fourofakind()==True:
+        score = 8
+        print(who, 'has Four of a Kind')
+
+    #Full House
+    elif pair()==True\
+    and threeofakind()==True:
+        score =7
+        print(who, 'has a Full House')
+
+    #Flush (all cards are the same suit)
+    elif (all('♣' in card for card in hand) or all('♠' in card for card in hand)\
+    or all('♥' in card for card in hand)\
+    or all('♦' in card for card in hand)):
+        score =6
+        print(who,'has Flush')
+
+    #straight (consecutive numbers but different suits - reuse straight flush but do not add on conditionals for suit)
+    elif straightflush()==True:
+        score =5
+        print(who, 'has a Straight')
+
+    #three of a Kind
+    elif threeofakind()==True:
+        score = 4
+        print(who, 'has Three of a Kind')
+
+    #Full House
+    elif pair()==True:
+        score =7
+        print(who, 'has a pair')
+
+drawhand()
+scorehand(comphand, cscore, "Computer")
+scorehand(myhand, mscore, "Player")
+
+anothergame=input("Play again? Y/N: ")
+if anothergame == 'Y' or anothergame == 'y':
+    deck.clear()
+    drawhand()
